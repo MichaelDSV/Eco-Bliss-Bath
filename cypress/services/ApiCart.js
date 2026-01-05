@@ -1,0 +1,67 @@
+const apiOrders = `${Cypress.env("apiUrl")}/orders`;
+
+/**
+ * GET /orders
+ * Récupère le panier de l'utilisateur
+ */
+export const getCart = (token = null) => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  return cy.request({
+    method: "GET",
+    url: apiOrders,
+    headers,
+    failOnStatusCode: false,
+  });
+};
+
+/**
+ * PUT /orders/add
+ * Ajoute un produit au panier
+ */
+export const addToCart = (token, productId, quantity = 1) => {
+  return cy.request({
+    method: "PUT",
+    url: `${apiOrders}/add`,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: {
+      product: productId,
+      quantity,
+    },
+    failOnStatusCode: false,
+  });
+};
+
+/**
+ * POST /orders
+ * Valide la commande en cours (Swagger officiel)
+ */
+export const submitOrder = (token) => {
+  return cy.request({
+    method: "POST",
+    url: apiOrders,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    failOnStatusCode: false,
+  });
+};
+
+/**
+ * DELETE /orders/{orderLineId}/delete
+ * Supprime une ligne du panier
+ */
+export const clearCart = (token, orderLineId) => {
+  return cy.request({
+    method: "DELETE",
+    url: `${apiOrders}/${orderLineId}/delete`,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((response) => {
+    expect(response.status).to.eq(200);
+    return response.body;
+  });
+};
