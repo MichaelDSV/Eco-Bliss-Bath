@@ -1,21 +1,38 @@
-
 const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
+
+  env: {
+    apiUrl: "http://localhost:8081",
+    username: "test2@test.fr",
+    password: "testtest",
+  },
+
+  // Vidéos + screenshots
+  video: true,
+  videosFolder: "cypress/videos",
+  screenshotOnRunFailure: true,
+  screenshotsFolder: "cypress/screenshots",
+
+  defaultCommandTimeout: 5000,
+
+  // Mochawesome
   reporter: "cypress-mochawesome-reporter",
   reporterOptions: {
     reportDir: "cypress/reports",
-    charts: true,
     reportPageTitle: "Eco Bliss Bath - Cypress Report",
+    charts: true,
     embeddedScreenshots: true,
     inlineAssets: true,
-    saveAllAttempts: false
+    saveAllAttempts: false,
   },
+
   e2e: {
+    baseUrl: "http://localhost:4200",
+
     setupNodeEvents(on, config) {
       require("cypress-mochawesome-reporter/plugin")(on);
       return config;
     },
-    baseUrl: "http://localhost:8081"
-  }
+  },
 });
