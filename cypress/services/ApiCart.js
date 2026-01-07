@@ -38,16 +38,18 @@ export const addToCart = (token, productId, quantity = 1) => {
  * POST /orders
  * Valide la commande en cours (Swagger officiel)
  */
-export const submitOrder = (token) => {
+export const submitOrder = (token, body = {}) => {
   return cy.request({
     method: "POST",
     url: apiOrders,
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    body,
     failOnStatusCode: false,
   });
 };
+
 
 /**
  * DELETE /orders/{orderLineId}/delete

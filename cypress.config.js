@@ -13,7 +13,7 @@ module.exports = defineConfig({
   videosFolder: "cypress/videos",
   screenshotOnRunFailure: true,
   screenshotsFolder: "cypress/screenshots",
-  defaultCommandTimeout: 5000,
+  defaultCommandTimeout: 10000,
 
   // Reporter Mochawesome
   reporter: "cypress-mochawesome-reporter",

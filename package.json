@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/MichaelDSV/Eco-Bliss-Bath#readme",
   "devDependencies": {
+    "@faker-js/faker": "^10.2.0",
     "cypress": "^15.8.1",
     "cypress-mochawesome-reporter": "^4.0.2",
     "mochawesome": "^7.1.4",

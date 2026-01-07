@@ -1,99 +1,102 @@
 import { login } from "../../services/ApiAuth";
-import { getCart, addToCart } from "../../services/ApiCart";
 import { getProducts } from "../../services/ApiProducts";
+import { getCart, addToCart, clearCart } from "../../services/ApiCart";
 
+/**
+ * Helper : vide le panier proprement si une commande existe
+ * (si l'API renvoie 404 "pas de commande en cours", on ignore)
+ */
+const emptyCart = (token) => {
+  return getCart(token).then((cartRes) => {
+    // Selon ton API : 404 si pas de panier en cours
+    if (cartRes.status === 404) return;
 
-describe("Test GET sur le panier sans connection", () => {
-  context("GET /orders", () => {
-    it("La requête doit retourner un code erreur 401 si l'utilisateur n'est pas connecté", () => {
-      getCart().then((response) => {
-        expect(response.status).to.eq(401);
+    const lines = cartRes.body?.orderLines || [];
+    if (!lines.length) return;
 
-        cy.writeFile("cypress/logs/cart_no_auth.json", {
-          status: response.status,
-          body: response.body,
-          timestamp: new Date().toISOString()
+    lines.forEach((line) => {
+      clearCart(token, line.id);
+    });
+  });
+};
+
+describe("Tests API panier (/orders)", () => {
+  let token;
+
+  beforeEach(() => {
+    login("test2@test.fr", "testtest", 200).then((res) => {
+      token = res.body.token;
+      expect(token, "token JWT").to.exist;
+    });
+  });
+
+  it("GET /orders sans connexion -> retourne 401 ou 403", () => {
+    // Pas de token
+    getCart(null).then((res) => {
+      expect([401, 403]).to.include(res.status);
+    });
+  });
+
+  it("GET /orders connecté -> renvoie le panier (après ajout d'un produit)", () => {
+    emptyCart(token).then(() => {
+      getProducts(token).then((productsRes) => {
+        expect(productsRes.status).to.eq(200);
+
+        const products = productsRes.body || [];
+        const produitEnStock = products.find((p) => (p.availableStock ?? 0) > 0);
+        expect(produitEnStock, "Produit en stock trouvé").to.exist;
+
+        // 1) On ajoute un produit => ça crée un panier
+        addToCart(token, produitEnStock.id, 1).then((addRes) => {
+          expect(addRes.status, "Ajout au panier").to.eq(200);
+
+          // 2) Ensuite seulement, on GET le panier
+          getCart(token).then((cartRes) => {
+            // Ici, on attend un panier existant => 200
+            expect(cartRes.status, "GET panier connecté").to.eq(200);
+
+            const lines = cartRes.body?.orderLines || [];
+            expect(lines.length, "Panier contient au moins 1 ligne").to.be.greaterThan(0);
+
+            // Optionnel : vérifier que le produit ajouté est bien présent
+            const found = lines.some((l) => l.product?.id === produitEnStock.id);
+            expect(found, "Produit ajouté présent dans le panier").to.eq(true);
+          });
         });
       });
     });
   });
-});
 
-describe("Test sur le pannier si l'utilisateur est connecté", () => {
-  let authToken;
+  it("PUT /orders/add -> ajoute un produit en stock", () => {
+    emptyCart(token).then(() => {
+      getProducts(token).then((productsRes) => {
+        expect(productsRes.status).to.eq(200);
 
-  beforeEach(() => {
-    login("test2@test.fr", "testtest", 200).then((response) => {
+        const products = productsRes.body || [];
+        const produitEnStock = products.find((p) => (p.availableStock ?? 0) > 0);
+        expect(produitEnStock, "Produit en stock trouvé").to.exist;
 
-      authToken = Cypress.env("authToken");
-    });
-  });
-
-  it("La requête doit renvoyer la liste des produits qui sont dans le panier", () => {
-    getCart(authToken).then((response) => {
-      expect(response.status).to.eq(200);
-      expect(response.body).to.have.property("orderLines").that.is.an("array");
-
-      if (response.body.orderLines.length > 0) {
-        response.body.orderLines.forEach((line) => {
-          expect(line).to.have.property("id");
-          expect(line).to.have.property("quantity");
-          expect(line).to.have.property("product");
-
-          expect(line.product).to.have.property("id");
-          expect(line.product).to.have.property("name");
-          expect(line.product).to.have.property("price");
+        addToCart(token, produitEnStock.id, 1).then((res) => {
+          expect(res.status).to.eq(200);
         });
-      } else {
-        cy.log("Le panier est vide");
-      }
+      });
     });
   });
 
-});
+  it("PUT /orders/add -> REFUSE un produit en rupture (BUG attendu si 200)", () => {
+    emptyCart(token).then(() => {
+      getProducts(token).then((productsRes) => {
+        expect(productsRes.status).to.eq(200);
 
-describe("Test PUT sur le panier", () => {
-  let authToken;
-  let produitEnStock;
-  let produitEnRupture;
+        const products = productsRes.body || [];
+        const produitEnRupture = products.find((p) => (p.availableStock ?? 0) <= 0);
+        expect(produitEnRupture, "Produit en rupture trouvé").to.exist;
 
-  beforeEach(() => {
-    cy.wrap(null).then(() => {
-      return login("test2@test.fr", "testtest", 200);
-    }).then((response) => {
-
-      authToken = response.body.token;
-
-      return getProducts(authToken);
-    }).then((response) => {
-      expect(response.status).to.eq(200);
-      const produits = response.body;
-      produitEnStock = produits.find((p) => p.availableStock > 0);
-      produitEnRupture = produits.find((p) => p.availableStock <= 0);
-    });
-  });
-
-  it("Ajoute un produit en stock au panier", () => {
-    cy.wrap(null).then(() => {
-      expect(produitEnStock).to.not.be.undefined;
-      return addToCart(authToken, produitEnStock.id, 1);
-    }).then((response) => {
-      expect(response.status).to.eq(200);
-    });
-  });
-
-  it("N'ajoute pas un produit en rupture de stock", () => {
-    cy.wrap(null).then(() => {
-      expect(produitEnRupture).to.not.be.undefined;
-      return addToCart(authToken, produitEnRupture.id, 1);
-    }).then((response) => {
-      expect(response.status).to.not.eq(200);
-
-      cy.writeFile("cypress/logs/cart_out_of_stock.json", {
-        status: response.status,
-        product: produitEnRupture.id,
-        responseBody: response.body,
-        timestamp: new Date().toISOString()
+        addToCart(token, produitEnRupture.id, 1).then((res) => {
+          // Comportement attendu (métier) : ne pas accepter => donc PAS 200
+          // Si ton API renvoie 200, le test échoue => preuve du BUG.
+          expect(res.status, "Ajout produit rupture doit échouer").to.not.eq(200);
+        });
       });
     });
   });

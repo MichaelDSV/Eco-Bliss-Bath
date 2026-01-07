@@ -1,6 +1,11 @@
 describe("Smoke – Faille XSS sur la route d’ajout au panier", () => {
   it("doit bloquer une tentative anormale lors de l’ajout au panier", () => {
 
+
+    cy.clearCookies();
+cy.clearLocalStorage();
+cy.visit("/");          // ou cy.visit(credentials.baseURL) si tu préfères
+
     // Utilisateur connecté
     cy.login();
 
