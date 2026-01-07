@@ -6,25 +6,26 @@ describe("Test GET sur une fiche produit", () => {
   let produitsAleatoires;
 
   beforeEach(() => {
-    cy.wrap(null).then(() => {
-      return login("test2@test.fr", "testtest", 200).then((response) => {
-        
-        authToken = response.body.token;
-        expect(authToken).to.not.be.undefined;
+    cy.wrap(null)
+      .then(() => {
+        return login("test2@test.fr", "testtest", 200).then((response) => {
+          authToken = response.body.token;
+          expect(authToken).to.not.be.undefined;
+        });
+      })
+      .then(() => {
+        return getRandomProduct(authToken, 3).then((response) => {
+          expect(response.status).to.eq(200);
+          produitsAleatoires = response.body;
+          expect(produitsAleatoires).to.be.an("array").and.have.length(3);
+        });
       });
-    }).then(() => {
-      return getRandomProduct(authToken, 3).then((response) => {
-        expect(response.status).to.eq(200);
-        produitsAleatoires = response.body;
-        expect(produitsAleatoires).to.be.an("array").and.have.length(3);
-      });
-    });
   });
 
   it("Doit vérifier les propriétés d'une fiche produit", () => {
     const produitTest = produitsAleatoires[0];
     expect(produitTest).to.not.be.undefined;
-    
+
     expect(produitTest).to.have.property("id");
     expect(produitTest).to.have.property("name");
     expect(produitTest).to.have.property("availableStock");

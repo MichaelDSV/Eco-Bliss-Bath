@@ -1,10 +1,8 @@
 import { login } from "../../services/ApiAuth";
 
 describe("Page produits", () => {
-  
   beforeEach(() => {
     login("test2@test.fr", "testtest", 200).then((response) => {
-      
       const token = response.body.token;
 
       cy.window().then((win) => {
@@ -23,5 +21,4 @@ describe("Page produits", () => {
     cy.visit("#/products/random");
     cy.getBySel("detail-product-stock").should("be.visible");
   });
-
 });

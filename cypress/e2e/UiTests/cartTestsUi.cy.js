@@ -1,7 +1,5 @@
 import { selectors } from "../../support/selectors";
 import credentials from "../../fixtures/credentials.json";
-
-
 import { getRandomProduct } from "../../services/ApiProducts";
 import { getCart, clearCart } from "../../services/ApiCart";
 
@@ -9,7 +7,6 @@ describe("Ajout au panier", () => {
   let token;
 
   beforeEach(() => {
-
     cy.visit("/");
 
     cy.intercept("POST", "/login").as("loginRequest");
@@ -38,8 +35,8 @@ describe("Ajout au panier", () => {
           clearCart(token, orderLine.id);
         });
       } else {
-        cy.log("Aucun élément à supprimer")
-      };
+        cy.log("Aucun élément à supprimer");
+      }
     });
 
     cy.get(selectors.logoutButton).click();
@@ -54,7 +51,7 @@ describe("Ajout au panier", () => {
 
       cy.visit(`/#/products/${productId}`);
       cy.get(selectors.productName, { timeout: 60000 }).should("be.visible");
-cy.get(selectors.productStock, { timeout: 60000 }).should("be.visible");
+      cy.get(selectors.productStock, { timeout: 60000 }).should("be.visible");
       cy.safeScreenshot("cartUiTests/1-FicheProduit-Avant-Ajout");
 
       cy.get(selectors.productName).should("contain", productName);
@@ -75,52 +72,50 @@ cy.get(selectors.productStock, { timeout: 60000 }).should("be.visible");
     });
   });
 
-it("Bloque l'ajout au panier avec une quantité négative (contrôle OK)", () => {
-  getRandomProduct(token).then((response) => {
-    const product = response.body[0];
-    const productId = product.id;
+  it("Bloque l'ajout au panier avec une quantité négative (contrôle OK)", () => {
+    getRandomProduct(token).then((response) => {
+      const product = response.body[0];
+      const productId = product.id;
 
-    cy.visit(`/#/products/${productId}`);
+      cy.visit(`/#/products/${productId}`);
 
-    cy.get(selectors.quantityInput).clear().type("-1");
-    cy.get(selectors.addToCartButton).click();
+      cy.get(selectors.quantityInput).clear().type("-1");
+      cy.get(selectors.addToCartButton).click();
 
-    // Preuve via API : le produit NE DOIT PAS être dans le panier
-    getCart(token).then((cartResponse) => {
-      const orderLines = cartResponse.body.orderLines || [];
-      const addedLine = orderLines.find((line) => line.product?.id === productId);
+      // le produit ne doit pas être dans le panier
+      getCart(token).then((cartResponse) => {
+        const orderLines = cartResponse.body.orderLines || [];
+        const addedLine = orderLines.find(
+          (line) => line.product?.id === productId
+        );
 
-      expect(
-        addedLine,
-        "Le produit ne doit pas être ajouté au panier avec une quantité négative"
-      ).to.not.exist;
+        expect(
+          addedLine,
+          "Le produit ne doit pas être ajouté au panier avec une quantité négative"
+        ).to.not.exist;
+      });
     });
   });
-});
 
+  it("BUG - Ajout au panier autorisé avec une quantité > 20", () => {
+    getRandomProduct(token).then((response) => {
+      const product = response.body[0];
+      const productId = product.id;
+      const productName = product.name;
 
+      cy.visit(`/#/products/${productId}`);
 
+      // Saisie d'une quantité invalide
+      cy.get(selectors.quantityInput).clear().type("21");
+      cy.get(selectors.addToCartButton).click();
 
- it("BUG - Ajout au panier autorisé avec une quantité > 20", () => {
-  getRandomProduct(token).then((response) => {
-    const product = response.body[0];
-    const productId = product.id;
-    const productName = product.name;
+      // BUG : le produit est quand même ajouté
+      cy.url().should("include", "/cart");
+      cy.get(selectors.cartLineName).should("contain", productName);
 
-    cy.visit(`/#/products/${productId}`);
-
-    // Saisie d'une quantité invalide
-    cy.get(selectors.quantityInput).clear().type("21");
-    cy.get(selectors.addToCartButton).click();
-
-    // BUG : le produit est quand même ajouté
-    cy.url().should("include", "/cart");
-    cy.get(selectors.cartLineName).should("contain", productName);
-
-    cy.log("BUG CONFIRMÉ : produit ajouté avec quantité > 20");
+      cy.log("BUG CONFIRMÉ : produit ajouté avec quantité > 20");
+    });
   });
-});
-
 
   it("Produit ajouté au panier, présent dans le panier via l'API", () => {
     getRandomProduct(token).then((response) => {
@@ -160,9 +155,7 @@ it("Bloque l'ajout au panier avec une quantité négative (contrôle OK)", () =>
         expect(addedProduct.quantity).to.equal(1);
 
         cy.log("Vérification API réussie pour le produit ajouté");
-
       });
     });
   });
 });
-

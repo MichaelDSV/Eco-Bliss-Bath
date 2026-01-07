@@ -14,7 +14,9 @@ describe("Sécurité API - Accès refusé sans connexion (401/403)", () => {
       failOnStatusCode: false, // récupérer le code d’erreur
     }).then((response) => {
       // 401 ou 403 selon backend
-      expect([401, 403], `Status reçu: ${response.status}`).to.include(response.status);
+      expect([401, 403], `Status reçu: ${response.status}`).to.include(
+        response.status
+      );
 
       // Génère un rapport
       cy.writeFile("cypress/logs/orders_no_auth.json", {

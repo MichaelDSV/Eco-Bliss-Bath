@@ -1,5 +1,4 @@
 export const selectors = {
-
   // Sélecteurs page de connexion
   loginButton: "[data-cy='nav-link-login']",
   usernameField: "[data-cy='login-input-username']",
@@ -15,7 +14,7 @@ export const selectors = {
   cartLineDelete: "[data-cy='cart-line-delete']",
   cartLineTotal: "[data-cy='cart-line-total']",
 
-    // Sélecteurs page produit
+  // Sélecteurs page produit
   product: "[data-cy='product']",
   productButton: "[data-cy='nav-link-products']",
   productLink: "[data-cy='product-link']",
@@ -23,6 +22,4 @@ export const selectors = {
   quantityInput: "[data-cy='detail-product-quantity']",
   productStock: "[data-cy='detail-product-stock']",
   productName: "[data-cy='detail-product-name']",
-
-
 };
