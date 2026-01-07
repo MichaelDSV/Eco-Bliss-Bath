@@ -1,0 +1,32 @@
+{
+  "status": 200,
+  "body": {
+    "id": 29,
+    "firstname": "Test",
+    "lastname": "User",
+    "address": "1 rue de Test",
+    "zipCode": "75001",
+    "city": "Paris",
+    "date": "2026-01-07T02:44:10+00:00",
+    "validated": true,
+    "orderLines": [
+      {
+        "id": 192,
+        "product": {
+          "id": 5,
+          "name": "Poussière de lune",
+          "description": "Essayez notre savon aujourd'hui pour une expérience de bain rafraîchissante et revitalisante.",
+          "price": 9.99,
+          "picture": "https://cdn.pixabay.com/photo/2016/07/11/15/45/soap-1509963_960_720.jpg"
+        },
+        "quantity": 1
+      }
+    ]
+  },
+  "productAdded": {
+    "id": 5,
+    "name": "Poussière de lune",
+    "stock": 17
+  },
+  "timestamp": "2026-01-07T02:44:09.984Z"
+}
