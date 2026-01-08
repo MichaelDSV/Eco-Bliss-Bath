@@ -72,7 +72,7 @@ describe("Ajout au panier", () => {
     });
   });
 
-  it("Bloque l'ajout au panier avec une quantité négative (contrôle OK)", () => {
+  it("Bloque l'ajout au panier avec une quantité négative", () => {
     getRandomProduct(token).then((response) => {
       const product = response.body[0];
       const productId = product.id;
@@ -96,6 +96,27 @@ describe("Ajout au panier", () => {
       });
     });
   });
+
+  it("BUG - Ajout au panier autorisé avec une quantité égale à 0", () => {
+  getRandomProduct(token).then((response) => {
+    const product = response.body[0];
+    const productId = product.id;
+    const productName = product.name;
+
+    cy.visit(`/#/products/${productId}`);
+
+    // Saisie d'une quantité invalide (0)
+    cy.get(selectors.quantityInput).clear().type("0");
+    cy.get(selectors.addToCartButton).click();
+
+    // BUG : le produit est quand même ajouté au panier
+    cy.url().should("include", "/cart");
+    cy.get(selectors.cartLineName).should("contain", productName);
+
+    cy.log("BUG CONFIRMÉ : produit ajouté avec une quantité égale à 0");
+  });
+});
+
 
   it("BUG - Ajout au panier autorisé avec une quantité > 20", () => {
     getRandomProduct(token).then((response) => {
