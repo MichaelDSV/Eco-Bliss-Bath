@@ -1,5 +1,4 @@
 import { selectors } from "../../support/selectors";
-import credentials from "../../fixtures/credentials.json";
 import { getRandomProduct } from "../../services/ApiProducts";
 import { getCart, clearCart } from "../../services/ApiCart";
 

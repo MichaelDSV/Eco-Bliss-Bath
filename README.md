@@ -64,7 +64,7 @@ Avant de lancer le projet, vous devez disposer de :
 
 ### 5.1 Cloner le dépôt
 
-git clone <URL_DU_DEPOT_GITHUB>
+git clone <https://github.com/MichaelDSV/Eco-Bliss-Bath.git>
 cd eco-bliss-bath
 
 ---
@@ -74,7 +74,7 @@ docker compose up -d
 
 ### 5.3 Accès aux services
 
-Site web : http://localhost:8080
+Site web : http://localhost:4200
 
 Documentation API (Swagger) : http://localhost:8081/api/doc
 
@@ -166,7 +166,7 @@ Système d’exploitation : Windows 11
 
 Accès local :
 
-Site : http://localhost:8080
+Site : http://localhost:4200
 
 API Swagger : http://localhost:8081/api/doc
 
