@@ -21,7 +21,7 @@ describe("API - Reviews : validation + tentative XSS", () => {
     const xssPayload = `<script>alert("XSS")</script>`;
 
     addReview(authToken, "test XSS", xssPayload, 5).then((response) => {
-      // on attend un rejet : 400 / 401 / 403 / 422 selon API
+      // on attend un rejet : 400 / 401 / 403 / 422
       expect([400, 401, 403, 422], `Status reçu: ${response.status}`).to.include(response.status);
     });
   });

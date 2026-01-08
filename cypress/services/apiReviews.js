@@ -5,7 +5,7 @@ export function addReview(token, title, comment, rating) {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    failOnStatusCode: false, // pour tester les erreurs (400, etc.)
+    failOnStatusCode: false, // pour tester les erreurs
     body: {
       title,
       comment,
